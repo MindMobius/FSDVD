@@ -8,13 +8,13 @@
 // @grant        none
 // ==/UserScript==
 
-(function() {
+(function () {
     'use strict';
 
     // 获取所有视频元素
     function getAllVideoElements() {
         const videoBlocks = document.querySelectorAll('div[data-block-type="view"]');
-        
+
         const videos = [];
         videoBlocks.forEach(block => {
             const fileNameElement = block.querySelector('.file-name');
@@ -25,7 +25,7 @@
                 });
             }
         });
-        
+
         return videos;
     }
 
@@ -75,20 +75,20 @@
         selectedCount.id = 'selectedCount';
 
         const btnGroup = document.createElement('div');
-        
+
         // 批量操作按钮
         const selectAllBtn = document.createElement('button');
         selectAllBtn.textContent = '全选';
         selectAllBtn.style.marginRight = '5px';
-        
+
         const invertBtn = document.createElement('button');
         invertBtn.textContent = '反选';
         invertBtn.style.marginRight = '5px';
-        
+
         const clearBtn = document.createElement('button');
         clearBtn.textContent = '取消';
         clearBtn.style.marginRight = '5px';
-        
+
         const exportBtn = document.createElement('button');
         exportBtn.textContent = '导出链接';
         exportBtn.style.backgroundColor = '#3370ff';
@@ -110,71 +110,71 @@
             item.style.display = 'flex';
             item.style.justifyContent = 'space-between';
             item.style.alignItems = 'center';
-    
+
             // 添加复选框
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
             checkbox.dataset.index = index;
             checkbox.style.marginRight = '10px';
             item.appendChild(checkbox);
-    
+
             // 添加序号
             const indexSpan = document.createElement('span');
             indexSpan.textContent = `${index + 1}. `;
             indexSpan.style.marginRight = '5px';
             item.appendChild(indexSpan);
-    
+
             const name = document.createElement('span');
             name.textContent = video.name;
             item.appendChild(name);
-    
+
             // 修改这里：调用createDownloadButton而不是直接创建按钮
             const downloadBtn = createDownloadButton(video);
             item.appendChild(downloadBtn);
-    
+
             list.appendChild(item);
         });
 
         // 在popup.appendChild(list);之后添加批量操作功能
         popup.appendChild(list);
         document.body.appendChild(popup);
-    
+
         // 批量操作功能实现
         const checkboxes = popup.querySelectorAll('input[type="checkbox"]');
-        
+
         function updateSelectedCount() {
             const selected = popup.querySelectorAll('input[type="checkbox"]:checked').length;
             selectedCount.textContent = `已选 ${selected} 个视频`;
         }
-    
+
         checkboxes.forEach(checkbox => {
             checkbox.addEventListener('change', updateSelectedCount);
         });
-    
+
         selectAllBtn.addEventListener('click', () => {
             checkboxes.forEach(checkbox => checkbox.checked = true);
             updateSelectedCount();
         });
-    
+
         invertBtn.addEventListener('click', () => {
             checkboxes.forEach(checkbox => checkbox.checked = !checkbox.checked);
             updateSelectedCount();
         });
-    
+
         clearBtn.addEventListener('click', () => {
             checkboxes.forEach(checkbox => checkbox.checked = false);
             updateSelectedCount();
         });
-    
+
         exportBtn.addEventListener('click', async () => {
             const selectedIndexes = Array.from(popup.querySelectorAll('input[type="checkbox"]:checked'))
                 .map(checkbox => parseInt(checkbox.dataset.index));
-            
+
             if (selectedIndexes.length === 0) {
                 alert('请至少选择一个视频');
                 return;
             }
-    
+
             // 创建结果展示弹窗
             const resultPopup = document.createElement('div');
             resultPopup.style.position = 'fixed';
@@ -189,7 +189,7 @@
             resultPopup.style.padding = '20px';
             resultPopup.style.zIndex = '10000';
             resultPopup.style.overflow = 'auto';
-    
+
             const closeBtn = document.createElement('button');
             closeBtn.textContent = '×';
             closeBtn.style.position = 'absolute';
@@ -201,12 +201,12 @@
             closeBtn.style.cursor = 'pointer';
             closeBtn.addEventListener('click', () => document.body.removeChild(resultPopup));
             resultPopup.appendChild(closeBtn);
-    
+
             const title = document.createElement('h3');
             title.textContent = '视频下载链接';
             title.style.marginBottom = '15px';
             resultPopup.appendChild(title);
-    
+
             // 添加状态栏
             const statusBar = document.createElement('div');
             statusBar.style.marginBottom = '10px';
@@ -215,7 +215,7 @@
             statusBar.style.borderRadius = '4px';
             statusBar.textContent = '准备获取下载链接...';
             resultPopup.appendChild(statusBar);
-    
+
             const textarea = document.createElement('textarea');
             textarea.style.width = '100%';
             textarea.style.height = '300px';
@@ -225,12 +225,12 @@
             textarea.style.borderRadius = '4px';
             textarea.readOnly = true;
             resultPopup.appendChild(textarea);
-    
+
             const btnGroup = document.createElement('div');
             btnGroup.style.display = 'flex';
             btnGroup.style.justifyContent = 'flex-end';
             btnGroup.style.gap = '10px';
-    
+
             const copyBtn = document.createElement('button');
             copyBtn.textContent = '复制链接';
             copyBtn.style.padding = '8px 16px';
@@ -244,21 +244,21 @@
                 document.execCommand('copy');
                 alert('链接已复制到剪贴板');
             });
-    
+
             btnGroup.append(copyBtn);
             resultPopup.appendChild(btnGroup);
             document.body.appendChild(resultPopup);
-    
+
             // 实时获取并显示下载链接
             for (const index of selectedIndexes) {
                 const video = videos[index];
                 statusBar.textContent = `正在获取: ${video.name}...`;
-                
+
                 try {
                     const options = await getVideoDownloadOptions(video.element);
                     if (options && options.length > 0) {
-                        const bestQuality = options.find(o => o.quality === '原画') || 
-                                      options[options.length - 1];
+                        const bestQuality = options.find(o => o.quality === '原画') ||
+                            options[options.length - 1];
                         textarea.value += `${bestQuality.url}\n`;
                         statusBar.textContent = `获取成功: ${video.name}`;
                     } else {
@@ -267,55 +267,14 @@
                 } catch (e) {
                     statusBar.textContent = `获取失败: ${video.name} (${e.message})`;
                 }
-                
+
                 // 滚动到底部
                 textarea.scrollTop = textarea.scrollHeight;
                 await new Promise(resolve => setTimeout(resolve, 300)); // 添加短暂延迟
             }
-    
+
             statusBar.textContent = `已完成 ${selectedIndexes.length} 个视频的链接获取`;
         });
-    }
-
-    // 修改getVideoDownloadOptions函数
-    async function getVideoDownloadOptions(videoElement) {
-        // 确保点击的是正确的预览按钮
-        const previewBtn = videoElement.closest('.file-block').querySelector('.btn-preview');
-        if (previewBtn) {
-            previewBtn.click();
-            
-            // 等待选项列表出现
-            return new Promise(resolve => {
-                const checkInterval = setInterval(() => {
-                    const optionsList = document.querySelector('.xg-options-list:not(.hide)');
-                    if (optionsList) {
-                        clearInterval(checkInterval);
-                        
-                        // 提取所有下载选项
-                        const options = Array.from(optionsList.querySelectorAll('.option-item'))
-                            .filter(item => item.getAttribute('url'))
-                            .map(item => ({
-                                text: item.getAttribute('showtext') || '下载',
-                                url: item.getAttribute('url'),
-                                quality: item.getAttribute('definition')
-                            }));
-                        
-                        // 关闭选项列表
-                        const closeBtn = optionsList.querySelector('.close-btn');
-                        if (closeBtn) closeBtn.click();
-                        
-                        resolve(options.length > 0 ? options : null);
-                    }
-                }, 200);
-                
-                // 设置超时
-                setTimeout(() => {
-                    clearInterval(checkInterval);
-                    resolve(null);
-                }, 3000);
-            });
-        }
-        return null;
     }
 
     // 主函数
@@ -333,7 +292,7 @@
         mainBtn.style.borderRadius = '4px';
         mainBtn.style.cursor = 'pointer';
         mainBtn.style.zIndex = '9998';
-        
+
         // 创建引导提示
         const guideTip = document.createElement('div');
         guideTip.innerHTML = '请滑动列表等待文档中所有视频元素加载完毕 <br> 重复打开关闭界面可以刷新加载内容 <br> 然后点击此按钮即可下载和获取视频地址 <button id="closeGuide" style="margin-left:10px;background:none;border:none;color:#3370ff;cursor:pointer;">我知道了</button>';
@@ -346,7 +305,7 @@
         guideTip.style.borderRadius = '4px';
         guideTip.style.zIndex = '9997';
         guideTip.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
-        
+
         // 关闭引导提示
         document.body.appendChild(guideTip);
         guideTip.querySelector('#closeGuide').addEventListener('click', () => {
@@ -369,25 +328,25 @@
         // 点击视频元素展开选项
         const previewBtn = videoElement.querySelector('.btn-preview');
         if (previewBtn) previewBtn.click();
-        
+
         // 等待选项列表出现
         return new Promise(resolve => {
             const checkInterval = setInterval(() => {
                 const optionsList = document.querySelector('.xg-options-list:not(.hide)');
                 if (optionsList) {
                     clearInterval(checkInterval);
-                    
+
                     // 提取所有下载选项
                     const options = Array.from(optionsList.querySelectorAll('.option-item')).map(item => ({
                         text: item.getAttribute('showtext'),
                         url: item.getAttribute('url'),
                         quality: item.getAttribute('definition')
                     }));
-                    
+
                     // 关闭选项列表
                     const closeBtn = document.querySelector('.xg-options-list:not(.hide) .close-btn');
                     if (closeBtn) closeBtn.click();
-                    
+
                     resolve(options);
                 }
             }, 200);
@@ -404,7 +363,7 @@
         btn.style.border = 'none';
         btn.style.borderRadius = '4px';
         btn.style.cursor = 'pointer';
-        
+
         btn.addEventListener('click', async () => {
             const options = await getVideoDownloadOptions(video.element);
             if (options && options.length > 0) {
@@ -418,7 +377,7 @@
                 optionPopup.style.borderRadius = '8px';
                 optionPopup.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
                 optionPopup.style.zIndex = '10000';
-                
+
                 // 添加关闭按钮
                 const popupCloseBtn = document.createElement('button');
                 popupCloseBtn.textContent = '×';
@@ -437,7 +396,7 @@
                 const title = document.createElement('h4');
                 title.textContent = `选择下载清晰度: ${video.name}`;
                 optionPopup.appendChild(title);
-                
+
                 options.forEach(option => {
                     const optionBtn = document.createElement('button');
                     optionBtn.textContent = option.text;
@@ -449,19 +408,19 @@
                     optionBtn.style.color = 'white';
                     optionBtn.style.border = 'none';
                     optionBtn.style.borderRadius = '4px';
-                    
+
                     optionBtn.addEventListener('click', () => {
                         window.open(option.url, '_blank');
                         document.body.removeChild(optionPopup);
                     });
-                    
+
                     optionPopup.appendChild(optionBtn);
                 });
 
                 document.body.appendChild(optionPopup);
             }
         });
-        
+
         return btn;
     }
 })();
