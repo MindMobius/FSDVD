@@ -1,10 +1,12 @@
 // ==UserScript==
 // @name         FSDVD - 飞书文档视频下载
-// @namespace    http://tampermonkey.net/
+// @license      GPL License
+// @namespace    https://bytedance.com
 // @version      0.1
 // @description  飞书文档视频下载工具
-// @author       YourName
-// @match        https://*.feishu.cn/*
+// @author       906051999
+// @match        *://*.feishu.cn/*
+// @match        *://*.larkoffice.com/*
 // @grant        none
 // ==/UserScript==
 
