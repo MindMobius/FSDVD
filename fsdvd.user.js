@@ -203,9 +203,18 @@
             resultPopup.appendChild(closeBtn);
     
             const title = document.createElement('h3');
-            title.textContent = '视频下载链接 (实时更新)';
+            title.textContent = '视频下载链接';
             title.style.marginBottom = '15px';
             resultPopup.appendChild(title);
+    
+            // 添加状态栏
+            const statusBar = document.createElement('div');
+            statusBar.style.marginBottom = '10px';
+            statusBar.style.padding = '8px';
+            statusBar.style.backgroundColor = '#f5f5f5';
+            statusBar.style.borderRadius = '4px';
+            statusBar.textContent = '准备获取下载链接...';
+            resultPopup.appendChild(statusBar);
     
             const textarea = document.createElement('textarea');
             textarea.style.width = '100%';
@@ -261,26 +270,28 @@
             // 实时获取并显示下载链接
             for (const index of selectedIndexes) {
                 const video = videos[index];
-                textarea.value += `正在获取: ${video.name}...\n`;
+                statusBar.textContent = `正在获取: ${video.name}...`;
                 
                 try {
                     const options = await getVideoDownloadOptions(video.element);
                     if (options && options.length > 0) {
                         const bestQuality = options.find(o => o.quality === '原画') || 
                                       options[options.length - 1];
-                        textarea.value += `${bestQuality.url}\n\n`;
+                        textarea.value += `${bestQuality.url}\n`;
+                        statusBar.textContent = `获取成功: ${video.name}`;
                     } else {
-                        textarea.value += `获取失败: 未找到下载链接\n\n`;
+                        statusBar.textContent = `获取失败: ${video.name} (未找到下载链接)`;
                     }
                 } catch (e) {
-                    textarea.value += `获取失败: ${e.message}\n\n`;
+                    statusBar.textContent = `获取失败: ${video.name} (${e.message})`;
                 }
                 
                 // 滚动到底部
                 textarea.scrollTop = textarea.scrollHeight;
+                await new Promise(resolve => setTimeout(resolve, 300)); // 添加短暂延迟
             }
     
-            textarea.value += '所有链接获取完成！';
+            statusBar.textContent = `已完成 ${selectedIndexes.length} 个视频的链接获取`;
         });
     }
 
