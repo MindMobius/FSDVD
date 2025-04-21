@@ -245,25 +245,7 @@
                 alert('链接已复制到剪贴板');
             });
     
-            const downloadBtn = document.createElement('button');
-            downloadBtn.textContent = '下载为TXT';
-            downloadBtn.style.padding = '8px 16px';
-            downloadBtn.style.backgroundColor = '#3370ff';
-            downloadBtn.style.color = 'white';
-            downloadBtn.style.border = 'none';
-            downloadBtn.style.borderRadius = '4px';
-            downloadBtn.style.cursor = 'pointer';
-            downloadBtn.addEventListener('click', () => {
-                const blob = new Blob([textarea.value], { type: 'text/plain' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = '飞书视频下载链接.txt';
-                a.click();
-                URL.revokeObjectURL(url);
-            });
-    
-            btnGroup.append(copyBtn, downloadBtn);
+            btnGroup.append(copyBtn);
             resultPopup.appendChild(btnGroup);
             document.body.appendChild(resultPopup);
     
@@ -343,7 +325,7 @@
         mainBtn.textContent = '显示视频列表';
         mainBtn.style.position = 'fixed';
         mainBtn.style.bottom = '20px';
-        mainBtn.style.right = '20px';
+        mainBtn.style.left = '20px';  // 从right改为left
         mainBtn.style.padding = '10px 20px';
         mainBtn.style.backgroundColor = '#3370ff';
         mainBtn.style.color = 'white';
@@ -352,6 +334,25 @@
         mainBtn.style.cursor = 'pointer';
         mainBtn.style.zIndex = '9998';
         
+        // 创建引导提示
+        const guideTip = document.createElement('div');
+        guideTip.innerHTML = '请滑动列表等待文档中所有视频元素加载完毕 <br> 重复打开关闭界面可以刷新加载内容 <br> 然后点击此按钮即可下载和获取视频地址 <button id="closeGuide" style="margin-left:10px;background:none;border:none;color:#3370ff;cursor:pointer;">我知道了</button>';
+        guideTip.style.position = 'fixed';
+        guideTip.style.bottom = '60px';
+        guideTip.style.left = '20px';
+        guideTip.style.padding = '10px 15px';
+        guideTip.style.backgroundColor = '#f0f7ff';
+        guideTip.style.border = '1px solid #3370ff';
+        guideTip.style.borderRadius = '4px';
+        guideTip.style.zIndex = '9997';
+        guideTip.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+        
+        // 关闭引导提示
+        document.body.appendChild(guideTip);
+        guideTip.querySelector('#closeGuide').addEventListener('click', () => {
+            document.body.removeChild(guideTip);
+        });
+
         mainBtn.addEventListener('click', () => {
             const videos = getAllVideoElements();
             createVideoListPopup(videos);
