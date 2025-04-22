@@ -1,6 +1,10 @@
 # FSDVD
 Feishu document video download
-通过Tampermonkey的脚本，实现飞书文档视频下载功能。
+
+实现飞书文档视频下载功能。
+
+## 下载地址
+[Tampermonkey插件地址](https://greasyfork.org/zh-CN/scripts/533566-fsdvd-%E9%A3%9E%E4%B9%A6%E6%96%87%E6%A1%A3%E8%A7%86%E9%A2%91%E4%B8%8B%E8%BD%BD)
 
 ## 功能特性
 - 自动检测飞书文档中的所有视频元素
